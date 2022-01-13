@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="weatherCheck.mapper.WeatherInfMapper">
+
+    <resultMap id="userResultMap" type="weatherCheck.reflectOne.CityWeather">
+        <id property="ID" column="citylist_id" />
+        <result property="name" column="city_name"/>
+        <result property="day" column="fx_Date"/>
+        <result property="maxTemp" column="temp_Max"/>
+        <result property="minTemp" column="temp_Min"/>
+        <result property="condition" column="text_Day"/>
+    </resultMap>
+
+    <select id="getCityInf" resultType="weatherCheck.reflectOne.CityList">
+        select *from city_list where city_name = #{id}
+    </select>
+
+    <select id="selectName" resultType="String">
+        select cityList_Id as cityListId from city_list where city_name = #{id}
+    </select>
+
+    <select id="getName" resultType="String">
+        select city_name as name from city_list where cityList_Id = #{id}
+    </select>
+
+    <select id="checkThreeDay" resultType="weatherCheck.reflectOne.CityWeather">
+        select * from twdweather where ID = #{id}
+    </select>
+
+    <select id="findId" resultType="String">
+        select cityList_Id as cityListId from city_list
+    </select>
+
+    <insert id="insertInf" parameterType="weatherCheck.reflectOne.CityWeather">
+        insert into TD_weather (citylist_id ,city_name ,fx_Date ,temp_Max ,temp_Min ,text_Day )
+        values (#{ID},#{name},#{day},#{maxTemp},#{minTemp},#{condition})
+    </insert>
+
+    <update id="updateInf" parameterType="weatherCheck.reflectOne.CityWeather">
+        update set city_name=#{name},temp_Max=#{maxTemp},temp_Min=#{minTemp},text_Day=#{condition} where citylist_id = #{ID} AND fx_Date=#{day}
+    </update>
+
+    <delete id="deleteByID" parameterType="String">
+        delete from TD_weather where citylist_id = #{ID}
+    </delete>
+
+</mapper>
