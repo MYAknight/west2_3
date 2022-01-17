@@ -4,6 +4,8 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import weatherCheck.mapper.WeatherInfMapper;
 import weatherCheck.reflectOne.CityList;
 import weatherCheck.reflectOne.CityWeather;
@@ -26,17 +28,50 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 public class threeDayWeatherCheck {
+
     public static void main(String[] args) throws IOException, ParseException {
         Scanner sc = new Scanner(System.in);
-        System.out.println("请输入城市的名称，目前只可用（上海，北京，福州）");
+
+
+//        String CityName = "qingdao";  //添加其他城市示例，目前只能用城市名称拼音来添加，不能用汉字
+//        addCityByUser(CityName);
+
+        System.out.println("请输入城市的名称，默认只可用（上海，北京，福州）");
         String cityName = sc.nextLine();
 
-//        showCityInfByUser(cityName);  //查看城市信息
+//        showCityInfByUser(cityName);  //查看城市信息示例
 //        String cityName = "福州";
 
 //        updateAllByUser();  //数据库内全部内容更新示例
         CheckWeatherByUser(cityName);   //查看城市三日天气
+
+
     }
+
+    private static void addCityByUser(String name) throws IOException {
+        CityList cL1 = getCityInf(name);
+        SqlSession sql1 = getSession();
+        WeatherInfMapper mapper = sql1.getMapper(WeatherInfMapper.class);
+        mapper.deleteCityListByID(cL1.getCityListId());
+        sql1.commit();
+        mapper.insertCityList(cL1);
+        sql1.commit();
+    }
+
+    private static CityList getCityInf(String name) throws IOException {
+        String JSCity = getCity(name);
+        JSONObject J = new JSONObject(JSCity);
+        JSONArray JA = J.getJSONArray("location");
+        JSONObject cityNeed = JA.getJSONObject(0);
+        String cityList_Id = cityNeed.getString("id");
+        String city_name = cityNeed.getString("name");
+        float lat = Float.parseFloat(cityNeed.getString("lat"));
+        float lon = Float.parseFloat(cityNeed.getString("lon"));
+        Date set_time = new Date();
+        CityList c1 = new CityList(cityList_Id,city_name,lat,lon,set_time);
+        return c1;
+    }
+
     /*
     输出城市的信息
      */
@@ -58,7 +93,7 @@ public class threeDayWeatherCheck {
             deleteByID(cityID);
             String weatherInf = getWeather(cityID);
             String cityName = mapper.getName(cityID);
-            List<CityWeather> lCW = dealInf(weatherInf, cityName, cityID);
+            List<CityWeather> lCW = dealWeatherInf(weatherInf, cityName, cityID);
             deleteByID(cityID);
             for (int j = 0; j < lCW.size(); j++) {
                 insertBase(lCW.get(j));
@@ -72,7 +107,7 @@ public class threeDayWeatherCheck {
     private static void CheckWeatherByUser(String cityName) throws IOException, ParseException {
         String cityID = getID(cityName);
         String weatherInf = getWeather(cityID);
-        List<CityWeather> lCW = dealInf(weatherInf, cityName, cityID);
+        List<CityWeather> lCW = dealWeatherInf(weatherInf, cityName, cityID);
         deleteByID(cityID);
         for (int i = 0; i < lCW.size(); i++) {
             System.out.println(lCW.get(i));
@@ -105,7 +140,7 @@ public class threeDayWeatherCheck {
     /*
    利用正则表达式匹配得到的字符串中所需要的内容然后打包成CityWeather类，修改所需内容在这里
     */
-    private static List<CityWeather> dealInf(String TDW, String cityName, String cityID){
+    private static List<CityWeather> dealWeatherInf(String TDW, String cityName, String cityID){
         List<CityWeather> l1 = new ArrayList<>();
         String temp;
         int l = TDW.indexOf('[');
@@ -177,7 +212,26 @@ public class threeDayWeatherCheck {
         while ((line = br.readLine()) != null) {
             res.append(line);
         }
-        String source = "temp.txt";
+        return res.toString();
+    }
+
+    public static String getCity(String place) throws IOException {
+        String requestUrl ="https://geoapi.qweather.com/v2/city/lookup?key=7842172b8720488189bdd6969d2f32e1&location=";
+        String finalURL = requestUrl+place;
+        URL url = new URL(finalURL);
+        HttpURLConnection httpUrlConn = (HttpURLConnection) url.openConnection();
+        httpUrlConn.setDoInput(true);
+        httpUrlConn.setRequestMethod("GET");
+        httpUrlConn.connect();
+        InputStream inputStream = httpUrlConn.getInputStream();
+        GZIPInputStream gzipInputStream =new GZIPInputStream(inputStream);
+        StringBuilder res =new StringBuilder();
+        String line;
+        BufferedReader br = new BufferedReader(new
+                InputStreamReader(gzipInputStream, StandardCharsets.UTF_8));
+        while ((line = br.readLine()) != null) {
+            res.append(line);
+        }
         return res.toString();
     }
 }

@@ -46,4 +46,13 @@
         delete from TD_weather where citylist_id = #{ID}
     </delete>
 
+    <delete id="deleteCityListByID" parameterType="String">
+        delete from city_list where cityList_Id = #{ID}
+    </delete>
+
+    <insert id="insertCityList" parameterType="weatherCheck.reflectOne.CityList">
+        insert into city_list (citylist_id ,city_name ,纬度 ,经度 ,set_time )
+        values (#{cityList_Id},#{city_name},#{纬度},#{经度},#{set_time})
+    </insert>
+
 </mapper>
