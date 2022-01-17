@@ -14,7 +14,12 @@ public interface WeatherInfMapper {
     /*
     将得到的数据传入数据库
      */
+
     Integer insertInf(CityWeather c1);
+
+    Integer insertCityList(CityList cL1);
+
+    Integer deleteCityListByID(String cityList_Id);
 
     Integer deleteByID(String ID);
 

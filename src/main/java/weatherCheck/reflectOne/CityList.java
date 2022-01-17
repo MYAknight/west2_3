@@ -8,13 +8,13 @@ public class CityList {
     如果要进行控制台内添加其他城市的话要用到这个类（摸了，还没有做）
      */
 
-    private int cityList_Id;
+    private String cityList_Id;
     private String city_name;
     private float 纬度 ;
     private float 经度;
     private Date set_time;
 
-    public CityList(int cityListId, String name, float 纬度, float 经度, Date set_time) {
+    public CityList(String cityListId, String name, float 纬度, float 经度, Date set_time) {
         this.cityList_Id = cityListId;
         this.city_name = name;
         this.纬度 = 纬度;
@@ -36,11 +36,11 @@ public class CityList {
                 ", 最后更新时间" + set_time;
     }
 
-    public int getCityListId() {
+    public String getCityListId() {
         return cityList_Id;
     }
 
-    public void setCityListId(int cityListId) {
+    public void setCityListId(String cityListId) {
         this.cityList_Id = cityListId;
     }
 
